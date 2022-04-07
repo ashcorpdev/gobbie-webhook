@@ -1,3 +1,4 @@
+import os
 import json
 import time
 import requests
@@ -5,10 +6,9 @@ from dotenv import load_dotenv
 from dotenv import dotenv_values
 
 load_dotenv()
-config = dotenv_values(".env")
 
-webhook_url = config['WEBHOOK_URL']
-lodestone_api_url = config['LODESTONE_BASE_API_URL']
+webhook_url = os.environ.get("WEBHOOK_URL")
+lodestone_api_url = os.environ.get("LODESTONE_BASE_API_URL")
 endpoints = ["topics", "notices", "maintenance", "updates", "status", "developers"]
 
 def postWebhook(webhook_data):
