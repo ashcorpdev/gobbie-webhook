@@ -1,12 +1,16 @@
-import asyncio
 import json
 import time
 import requests
+from dotenv import load_dotenv
+from dotenv import dotenv_values
 
-webhook_url = 'https://media.guilded.gg/webhooks/797af35d-5748-4df0-9d32-d148816985c4/dI1AEACSSAaAgUSqeiqUWSamiaSeKSsGc488We8gEaEemGG64Me4sasSW0EMMEWKSwKk0s40eUyu2akamiS84k'
-lodestone_api_url = 'https://lodestonenews.com/news/'
+load_dotenv()
+config = dotenv_values(".env")
+
+webhook_url = config['WEBHOOK_URL']
+lodestone_api_url = config['LODESTONE_BASE_API_URL']
 endpoints = ["topics", "notices", "maintenance", "updates", "status", "developers"]
-# Need to cache data to disk for most-recent call. If the API responds with the same output, don't send a new webhook.
+
 def postWebhook(webhook_data):
     print("Processing API request...")
     response = requests.post(
@@ -19,7 +23,6 @@ def postWebhook(webhook_data):
             % (response.status_code, response.text)
         )
     return response
-# Make API call -> Get data -> Get first item in the object -> Store the ID on disk.
 
 def getPosts():
     for endpoint in endpoints:
@@ -37,7 +40,6 @@ def getPosts():
         webhook_data = {}
         if "id" in json_data[0]:
             response_id = json_data[0]['id']
-            # DO checks to see if this post ID has already been seen.
             with open(f'latest_{endpoint}.json') as infile:
                 data = json.load(infile)
                 if(data['id'] == response_id):
@@ -81,12 +83,6 @@ def getPosts():
                             }
                         postWebhook(webhook_data)
                         print("Created new webhook post for", endpoint, "endpoint")
-        
-
-    # Check if request matches on file
-    # If different to request on file for this endpoint, push a webhook.
-    
-    #response = await postWebhook(webhook_data)
 
 def main():
     while(True):
